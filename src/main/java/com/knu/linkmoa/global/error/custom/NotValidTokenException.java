@@ -1,35 +1,21 @@
 package com.knu.linkmoa.global.error.custom;
 
-import com.knu.linkmoa.global.error.errorcode.ErrorCode;
+import com.knu.linkmoa.auth.jwt.dto.response.TokenStatus;
+import com.knu.linkmoa.auth.jwt.error.JwtErrorCode;
 import lombok.Getter;
 
 @Getter
 public class NotValidTokenException extends RuntimeException{
 
-    private ErrorCode errorCode;
+    private JwtErrorCode errorCode;
+    private TokenStatus tokenStatus;
 
-    public NotValidTokenException(ErrorCode errorCode) {
+    public NotValidTokenException(JwtErrorCode errorCode) {
         this.errorCode = errorCode;
     }
 
-    public NotValidTokenException(String message, ErrorCode errorCode) {
-        super(message);
+    public NotValidTokenException(JwtErrorCode errorCode, TokenStatus tokenStatus) {
         this.errorCode = errorCode;
+        this.tokenStatus = tokenStatus;
     }
-
-    public NotValidTokenException(String message, Throwable cause, ErrorCode errorCode) {
-        super(message, cause);
-        this.errorCode = errorCode;
-    }
-
-    public NotValidTokenException(Throwable cause, ErrorCode errorCode) {
-        super(cause);
-        this.errorCode = errorCode;
-    }
-
-    public NotValidTokenException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, ErrorCode errorCode) {
-        super(message, cause, enableSuppression, writableStackTrace);
-        this.errorCode = errorCode;
-    }
-
 }

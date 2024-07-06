@@ -1,9 +1,11 @@
 package com.knu.linkmoa.auth.jwt.service;
 
+import com.knu.linkmoa.auth.jwt.dto.response.TokenStatus;
+import com.knu.linkmoa.auth.jwt.error.JwtErrorCode;
 import com.knu.linkmoa.domain.member.entity.Member;
 import com.knu.linkmoa.domain.member.repository.MemberRepository;
+import com.knu.linkmoa.global.error.custom.CookieNotFoundException;
 import com.knu.linkmoa.global.error.custom.NotValidTokenException;
-import com.knu.linkmoa.global.error.errorcode.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -13,6 +15,7 @@ import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -64,19 +67,19 @@ public class JwtService {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
-            throw new NotValidTokenException(ErrorCode.NOT_VALID_TOKEN_EXCEPTION);
+            throw new NotValidTokenException(JwtErrorCode.NOT_VALID_TOKEN_EXCEPTION, TokenStatus.INVALID);
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT Token", e);
             if (isRefreshTokenExpired(e)) {
-                throw new NotValidTokenException(ErrorCode.EXPIRED_REFRESH_TOKEN_EXCEPTION);
+                throw new NotValidTokenException(JwtErrorCode.EXPIRED_REFRESH_TOKEN_EXCEPTION, TokenStatus.REFRESH_TOKEN_EXPIRED);
             }
-            throw new NotValidTokenException(ErrorCode.EXPIRED_ACCESS_TOKEN_EXCEPTION);
+            throw new NotValidTokenException(JwtErrorCode.EXPIRED_ACCESS_TOKEN_EXCEPTION, TokenStatus.ACCESS_TOKEN_EXPIRED);
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
-            throw new NotValidTokenException(ErrorCode.UNSUPPORTED_TOKEN_EXCEPTION);
+            throw new NotValidTokenException(JwtErrorCode.UNSUPPORTED_TOKEN_EXCEPTION, TokenStatus.UNSUPPORTED);
         } catch (IllegalArgumentException e) {
             log.info("JWT claims string is empty.", e);
-            throw new NotValidTokenException(ErrorCode.MISMATCH_CLAIMS_EXCEPTION);
+            throw new NotValidTokenException(JwtErrorCode.MISMATCH_CLAIMS_EXCEPTION, TokenStatus.MISMATCH_CLAIMS);
         }
     }
 
@@ -106,7 +109,7 @@ public class JwtService {
     public void saveRefreshToken(String email, String refresh) {
 
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("member가 없어요"));
+                .orElseThrow(() -> new UsernameNotFoundException("member가 없어요"));
 
         member.updateRefreshToken(refresh);
         memberRepository.save(member);
@@ -114,11 +117,36 @@ public class JwtService {
 
     public Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 60);
+        cookie.setMaxAge(14 * 24 * 60 * 60);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
 
         return cookie;
+    }
+
+    public String getRefreshTokenFromCookies(Cookie[] cookies){
+        String refresh = null;
+
+        if(cookies == null){
+            throw new CookieNotFoundException("Cookie가 하나도 없습니다. Cookie를 담아서 요청해주세요");
+        }
+
+        for (Cookie cookie : cookies) {
+            if(cookie.getName().equals("Authorization-refresh")){
+                refresh = cookie.getValue();
+            }
+        }
+
+        if(refresh == null){
+            throw new CookieNotFoundException("Authorization-refresh에 해당하는 쿠키를 찾지 못했습니다. Cookie를 확인해주세요");
+        }
+
+        return refresh;
+    }
+
+    public Member findMemberByRefresh(String refreshToken){
+        return memberRepository.findByRefresh(refreshToken)
+                .orElseThrow(() -> new NotValidTokenException(JwtErrorCode.REFRESH_TOKEN_MISMATCH_EXCEPTION, TokenStatus.REFRESH_TOKEN_MISMATCH));
     }
 
     private static boolean isRefreshTokenExpired(ExpiredJwtException e) {

@@ -4,9 +4,9 @@ import com.knu.linkmoa.auth.itself.dto.request.SignUpRequestDto;
 import com.knu.linkmoa.auth.itself.dto.response.TokenResponseDto;
 import com.knu.linkmoa.auth.jwt.service.JwtService;
 import com.knu.linkmoa.domain.member.entity.Member;
+import com.knu.linkmoa.domain.member.error.MemberErrorCode;
 import com.knu.linkmoa.domain.member.repository.MemberRepository;
 import com.knu.linkmoa.global.error.custom.MemberException;
-import com.knu.linkmoa.global.error.errorcode.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +33,7 @@ public class MemberService {
 
         // 이메일이 중복되면 오류 발생
         if (optionalExistingMember.isPresent()) {
-            throw new MemberException(ErrorCode.MEMBER_ALREADY_EXISTS_EMAIL);
+            throw new MemberException(MemberErrorCode.MEMBER_ALREADY_EXISTS_EMAIL);
         }
 
         Member member = Member.builder()
@@ -74,15 +74,13 @@ public class MemberService {
         return member;
     }
 
-    public String saveRefresh(String email, String refreshToken) throws UsernameNotFoundException{
+    public void saveRefresh(String email, String refreshToken) throws UsernameNotFoundException{
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 Email에 해당하는 유저가 없습니다"));
 
         member.updateRefreshToken(refreshToken);
 
         memberRepository.save(member);
-
-        return member.getRefresh();
     }
 
     public boolean checkDuplicateEmail(String email) {

@@ -39,7 +39,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         String accessToken = jwtService.createAccessToken(email, role);
         String refreshToken = jwtService.createRefreshToken();
-        String savedRefresh = memberService.saveRefresh(email, refreshToken);
+        memberService.saveRefresh(email, refreshToken);
 
         // redisService.setRefreshToken(email, refreshToken);
 
@@ -63,7 +63,6 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         log.info("자체 로그인에 성공하였습니다. 이메일 : {}", email);
         log.info("자체 로그인에 성공하였습니다. Access Token : {}", accessToken);
         log.info("자체 로그인에 성공하였습니다. Refresh Token : {}", refreshToken);
-        log.info("DB에 저장된 Refresh Token : {}", savedRefresh);
         // log.info("Redis에 저장된 RefreshToken : {}", redisService.getRefreshToken(email));
     }
 }

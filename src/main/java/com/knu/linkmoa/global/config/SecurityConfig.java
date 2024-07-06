@@ -57,6 +57,7 @@ public class SecurityConfig {
                                 .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/api/members/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/v3/**")).permitAll()
+                                .requestMatchers(new AntPathRequestMatcher("/api/jwt/reissue")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll()
                                 .anyRequest().authenticated()
                         )
