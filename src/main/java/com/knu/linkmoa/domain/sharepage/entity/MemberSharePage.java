@@ -24,6 +24,8 @@ public class MemberSharePage {
     @Column(name = "member_share_page_id")
     private Long id;
 
+    private boolean accept;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
@@ -33,11 +35,16 @@ public class MemberSharePage {
     private SharePage sharePage;
 
     @Builder
-    public MemberSharePage(Long id, Member member, SharePage sharePage) {
+    public MemberSharePage(Long id, boolean accept, Member member, SharePage sharePage) {
         this.id = id;
+        this.accept = accept;
         this.member = member;
         this.sharePage = sharePage;
         sharePage.getMemberSharePages().add(this);
         member.getMemberSharePages().add(this);
+    }
+
+    public void updateAccept(){
+        this.accept = true;
     }
 }

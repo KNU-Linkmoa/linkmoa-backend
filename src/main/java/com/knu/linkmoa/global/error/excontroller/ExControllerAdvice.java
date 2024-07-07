@@ -2,7 +2,9 @@ package com.knu.linkmoa.global.error.excontroller;
 
 import com.knu.linkmoa.auth.jwt.dto.response.ApiJwtResponse;
 import com.knu.linkmoa.global.error.custom.CookieNotFoundException;
+import com.knu.linkmoa.global.error.custom.MemberSharePageException;
 import com.knu.linkmoa.global.error.custom.NotValidTokenException;
+import com.knu.linkmoa.global.error.custom.SharePageException;
 import com.knu.linkmoa.global.spec.ApiResponseSpec;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,22 @@ public class ExControllerAdvice {
         ApiResponseSpec apiResponseSpec = new ApiResponseSpec(false, 404, e.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponseSpec);
+    }
+
+    @ExceptionHandler(SharePageException.class)
+    public ResponseEntity<ApiResponseSpec> handleSharePageNotFoundException(SharePageException e){
+
+        ApiResponseSpec apiResponseSpec = new ApiResponseSpec(false, 404, e.getSharePageErrorCode().getMessage());
+
+        return ResponseEntity.status(e.getSharePageErrorCode().getHttpStatus()).body(apiResponseSpec);
+    }
+
+    @ExceptionHandler(MemberSharePageException.class)
+    public ResponseEntity<ApiResponseSpec> handleMemberSharePageException(MemberSharePageException e){
+
+        ApiResponseSpec apiResponseSpec = new ApiResponseSpec(false, 400, e.getMemberSharePageErrorCode().getMessage());
+
+        return ResponseEntity.status(e.getMemberSharePageErrorCode().getHttpStatus()).body(apiResponseSpec);
     }
 
     @ExceptionHandler(CookieNotFoundException.class)
