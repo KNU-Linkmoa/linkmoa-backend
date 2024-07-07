@@ -25,7 +25,7 @@ public class ExControllerAdvice {
 
         return ResponseEntity.status(apiJwtResponse.getCode()).body(apiJwtResponse);
     }
-/*
+
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ApiResponseSpec> handleUsernameNotFoundException(UsernameNotFoundException e){
 
@@ -33,7 +33,6 @@ public class ExControllerAdvice {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiResponseSpec);
     }
-*/
 
     @ExceptionHandler(CookieNotFoundException.class)
     public ResponseEntity<ApiResponseSpec> handleCookieNotFoundException(CookieNotFoundException e){

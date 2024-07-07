@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,4 +27,10 @@ public class SharePage {
 
     @OneToMany(mappedBy = "sharePage")
     List<MemberSharePage> memberSharePages = new ArrayList<>();
+
+    @Builder
+    public SharePage(Long id, String title) {
+        this.id = id;
+        this.title = title;
+    }
 }
