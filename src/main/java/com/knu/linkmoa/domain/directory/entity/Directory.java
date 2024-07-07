@@ -5,6 +5,7 @@ import com.knu.linkmoa.domain.member.entity.Member;
 import com.knu.linkmoa.domain.site.entity.Site;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,6 +38,13 @@ public class Directory {
     @OneToMany(mappedBy = "parentDirectory",cascade=CascadeType.ALL,orphanRemoval = true)
     private List<Directory> childDirectories = new ArrayList<>();
 
+
+    @Builder
+    public Directory(String directoryName,Member member,Directory parentDirectory){
+        this.directoryName=directoryName;
+        this.member =member;
+        this.parentDirectory=parentDirectory;
+    }
     public void setMember(Member member){
         this.member = member;
         member.getDirectories().add(this);
@@ -46,9 +54,14 @@ public class Directory {
         this.parentDirectory=parentDirectory;
     }
 
-    public void setChildDirectories(Directory child){
+    public void addChildDirectory(Directory child) {
         childDirectories.add(child);
         child.setParentDirectory(this);
+    }
+
+    public void addSite(Site site) {
+        sites.add(site);
+        site.setDirectory(this);
     }
 
 }
